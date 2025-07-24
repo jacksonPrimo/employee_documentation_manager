@@ -1,0 +1,10 @@
+services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: employee_documentation_manager
+    ports:
+      - '5432:5432'
