@@ -23,7 +23,7 @@ describe('EmployeeController (e2e)', () => {
     describe('success cases', () => {
       it('return an error case name and hired date are empty', async () => {
         const response = await request(app.getHttpServer())
-          .post('/employee/register')
+          .post('/employee')
           .send({ name: 'jackson', hiredAt: '2023-07-12T00:00:00.000Z' })
           .expect(201);
         const createdEmployee = response.body as Employee;
@@ -35,7 +35,7 @@ describe('EmployeeController (e2e)', () => {
     describe('failure cases', () => {
       it('return an error case name is empty', () => {
         return request(app.getHttpServer())
-          .post('/employee/register')
+          .post('/employee')
           .send({ name: '', hiredAt: '2023-07-12T00:00:00.000Z' })
           .expect(400)
           .expect({
@@ -50,7 +50,7 @@ describe('EmployeeController (e2e)', () => {
         hiredAt.setDate(hiredAt.getDate() + 1);
         console.log(hiredAt);
         return request(app.getHttpServer())
-          .post('/employee/register')
+          .post('/employee')
           .send({ name: 'jackson', hiredAt: hiredAt })
           .expect(400)
           .expect({
@@ -64,7 +64,7 @@ describe('EmployeeController (e2e)', () => {
 
       it('return an error case date is empty', () => {
         return request(app.getHttpServer())
-          .post('/employee/register')
+          .post('/employee')
           .send({ name: 'jackson', hiredAt: '' })
           .expect(400)
           .expect({

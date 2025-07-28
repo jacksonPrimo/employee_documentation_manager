@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { Employee } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -12,5 +13,14 @@ export class EmployeeService {
       data: params,
     });
     return newEmployee;
+  }
+
+  async update(id: string, params: UpdateEmployeeDto): Promise<Employee> {
+    const employee = await this.prisma.employee.update({
+      where: { id: id },
+      data: params,
+    });
+
+    return employee;
   }
 }
