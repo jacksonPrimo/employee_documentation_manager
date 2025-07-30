@@ -9,5 +9,6 @@
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>../src/$1"
   },
-  "setupFilesAfterEnv": ["<rootDir>../test/setup.ts"]
+  "setupFilesAfterEnv": ["<rootDir>../test/setup.ts"],
+  "maxWorkers": 1
 }
