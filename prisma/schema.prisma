@@ -20,11 +20,24 @@ model Employee {
   hiredAt           DateTime 
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
+  documents         Document[]
 }
 
 model DocumentType {
   id                String      @default(uuid()) @id
   name              String      @unique
+  documents         Document[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+}
+
+model Document {
+  id                String        @default(uuid()) @id
+  pending           Boolean       @default(false)
+  employee          Employee      @relation(fields: [employeeId], references: [id])
+  employeeId        String
+  documentType      DocumentType  @relation(fields: [documentTypeId], references: [id])
+  documentTypeId    String      
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
