@@ -6,10 +6,40 @@ import {
 import { AssociateDocumentToEmployeeDto } from './dto/associate-document-to-employee.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Document, Employee } from '@prisma/client';
+import { ListDocumentsDto } from './dto/list-documents.dto';
 
 @Injectable()
 export class DocumentService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async list(
+    filters: ListDocumentsDto,
+  ): Promise<{ data: Document[]; meta: { total: number; page: number } }> {
+    const { employee, pending, type, page = 1 } = filters;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const where = {};
+    if (type) where['documentTypeId'] = type;
+    if (employee) where['employeeId'] = employee;
+    if (pending !== undefined && pending !== null) {
+      where['pending'] = pending;
+    }
+
+    const [documents, total] = await this.prisma.$transaction([
+      this.prisma.document.findMany({
+        where,
+        skip,
+        take: limit,
+      }),
+      this.prisma.document.count({ where }),
+    ]);
+
+    return {
+      data: documents,
+      meta: { total, page },
+    };
+  }
 
   async associate(data: AssociateDocumentToEmployeeDto): Promise<Document[]> {
     const { employeeId, documentTypeIds } = data;

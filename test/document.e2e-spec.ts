@@ -263,4 +263,94 @@ describe('DocumentController (e2e)', () => {
       });
     });
   });
+
+  describe('/document (GET)', () => {
+    describe('success cases', () => {
+      it('list without filters', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        const response = await request(app.getHttpServer())
+          .get(`/document`)
+          .expect(200);
+        const { meta, data } = response.body;
+        expect(meta).toEqual({
+          page: 1,
+          total: 2,
+        });
+        expect(data.length).toBe(2);
+      });
+
+      it('list with pending filter', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        await new DocumentFactory(
+          employee.id,
+          documentType.id,
+          false,
+        ).getInstance();
+        const response = await request(app.getHttpServer())
+          .get(`/document?pending=true`)
+          .expect(200);
+        const { meta, data } = response.body;
+        expect(meta).toEqual({
+          page: 1,
+          total: 1,
+        });
+        expect(data.length).toBe(1);
+      });
+
+      it('list with employee filter', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee1 = await new EmployeeFactory().getInstance();
+        const employee2 = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee1.id, documentType.id).getInstance();
+        await new DocumentFactory(employee2.id, documentType.id).getInstance();
+        const response = await request(app.getHttpServer())
+          .get(`/document?employee=${employee1.id}`)
+          .expect(200);
+        const { meta, data } = response.body;
+        expect(meta).toEqual({
+          page: 1,
+          total: 1,
+        });
+        expect(data.length).toBe(1);
+      });
+
+      it('list with type filter', async () => {
+        const documentType1 = await new DocumentTypeFactory().getInstance();
+        const documentType2 = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee.id, documentType1.id).getInstance();
+        await new DocumentFactory(employee.id, documentType2.id).getInstance();
+        const response = await request(app.getHttpServer())
+          .get(`/document?type=${documentType1.id}`)
+          .expect(200);
+        const { meta, data } = response.body;
+        expect(meta).toEqual({
+          page: 1,
+          total: 1,
+        });
+        expect(data.length).toBe(1);
+      });
+
+      it('list with pagination', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        const response = await request(app.getHttpServer())
+          .get(`/document?page=2`)
+          .expect(200);
+        const { meta, data } = response.body;
+        expect(meta).toEqual({
+          page: '2',
+          total: 2,
+        });
+        expect(data.length).toBe(0);
+      });
+    });
+  });
 });

@@ -3,9 +3,12 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
+  ParseBoolPipe,
   ParseFilePipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,6 +16,7 @@ import { DocumentService } from './document.service';
 import { AssociateDocumentToEmployeeDto } from './dto/associate-document-to-employee.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Injectable, PipeTransform } from '@nestjs/common';
+import { ListDocumentsDto } from './dto/list-documents.dto';
 
 @Injectable()
 export class FileLoggingPipe implements PipeTransform {
@@ -31,6 +35,22 @@ export class FileLoggingPipe implements PipeTransform {
 @Controller('document')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
+
+  @Get('/')
+  list(
+    @Query('page') page: number,
+    @Query('employee') employee: string,
+    @Query('type') type: string,
+    @Query('pending', new ParseBoolPipe({ optional: true })) pending: boolean,
+  ) {
+    const filters: ListDocumentsDto = {
+      page,
+      employee,
+      type,
+      pending,
+    };
+    return this.documentService.list(filters);
+  }
 
   @Post('/associate')
   associate(@Body() body: AssociateDocumentToEmployeeDto) {
