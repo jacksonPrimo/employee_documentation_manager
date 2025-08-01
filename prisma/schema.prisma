@@ -33,7 +33,7 @@ model DocumentType {
 
 model Document {
   id                String        @default(uuid()) @id
-  pending           Boolean       @default(false)
+  pending           Boolean       @default(true)
   employee          Employee      @relation(fields: [employeeId], references: [id])
   employeeId        String
   documentType      DocumentType  @relation(fields: [documentTypeId], references: [id])

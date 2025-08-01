@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AssociateDocumentToEmployeeDto } from './dto/associate-document-to-employee.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Document, Employee } from '@prisma/client';
@@ -43,6 +47,27 @@ export class DocumentService {
         employeeId: employeeId,
         documentTypeId: { in: documentTypeIds },
       },
+    });
+  }
+
+  async upload(id: string, file: Express.Multer.File): Promise<void> {
+    return await this.prisma.$transaction(async (tx) => {
+      const document = await tx.document.findUnique({
+        where: { id },
+      });
+      if (!document) {
+        throw new NotFoundException(
+          `Documento pendente com ID ${id} não encontrado.`,
+        );
+      }
+      if (!document.pending)
+        throw new ConflictException('Documento já enviado anteriormente');
+
+      await tx.document.update({
+        where: { id },
+        data: { pending: false },
+      });
+      console.log(`...sending file, ${file.filename}`);
     });
   }
 

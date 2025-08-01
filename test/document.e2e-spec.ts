@@ -182,4 +182,85 @@ describe('DocumentController (e2e)', () => {
       });
     });
   });
+
+  describe('/document/:id/upload (POST)', () => {
+    describe('success cases', () => {
+      it('upload file and change pending status of document', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        const documentFactory = new DocumentFactory(
+          employee.id,
+          documentType.id,
+        );
+
+        let document = await documentFactory.getInstance();
+        expect(document.pending).toBeTruthy();
+        const pdfBuffer = Buffer.from('123456', 'utf-8');
+        await request(app.getHttpServer())
+          .post(`/document/${document.id}/upload`)
+          .attach('file', pdfBuffer, 'teste.pdf')
+          .expect(201);
+        document = await documentFactory.getInstance();
+        expect(document.pending).toBeFalsy();
+      });
+    });
+
+    describe('failure cases', () => {
+      it('return an error case file is not in pdf format', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        const documentFactory = new DocumentFactory(
+          employee.id,
+          documentType.id,
+        );
+
+        const document = await documentFactory.getInstance();
+        const pdfBuffer = Buffer.from('123456', 'utf-8');
+        await request(app.getHttpServer())
+          .post(`/document/${document.id}/upload`)
+          .attach('file', pdfBuffer, 'teste.jpg')
+          .expect(400)
+          .expect({
+            message: 'O arquivo precisa ser em pdf',
+            error: 'Bad Request',
+            statusCode: 400,
+          });
+      });
+
+      it('return an error case file already uploaded', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        const documentFactory = new DocumentFactory(
+          employee.id,
+          documentType.id,
+          false,
+        );
+
+        const document = await documentFactory.getInstance();
+        const pdfBuffer = Buffer.from('123456', 'utf-8');
+        await request(app.getHttpServer())
+          .post(`/document/${document.id}/upload`)
+          .attach('file', pdfBuffer, 'teste.pdf')
+          .expect(409)
+          .expect({
+            message: 'Documento já enviado anteriormente',
+            error: 'Conflict',
+            statusCode: 409,
+          });
+      });
+
+      it('return an error case pending document not found', async () => {
+        const pdfBuffer = Buffer.from('123456', 'utf-8');
+        await request(app.getHttpServer())
+          .post(`/document/xxxxx/upload`)
+          .attach('file', pdfBuffer, 'teste.pdf')
+          .expect(404)
+          .expect({
+            message: 'Documento pendente com ID xxxxx não encontrado.',
+            error: 'Not Found',
+            statusCode: 404,
+          });
+      });
+    });
+  });
 });

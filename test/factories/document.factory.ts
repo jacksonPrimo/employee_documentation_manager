@@ -8,6 +8,7 @@ export class DocumentFactory implements FactoryInterface<Document> {
   constructor(
     private employeeId: string,
     private documentTypeId: string,
+    private pending: boolean = true,
   ) {
     this.service = new PrismaService();
   }
@@ -23,6 +24,7 @@ export class DocumentFactory implements FactoryInterface<Document> {
         data: {
           employeeId: this.employeeId,
           documentTypeId: this.documentTypeId,
+          pending: this.pending,
         },
       });
       return this.instance;
