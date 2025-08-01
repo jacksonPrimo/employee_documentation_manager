@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -29,5 +30,10 @@ export class EmployeeController {
     @Body() updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<any> {
     return await this.employeeService.update(id, updateEmployeeDto);
+  }
+
+  @Get('/:id/documentation-status')
+  async DocumentationStatus(@Param('id') id: string): Promise<any> {
+    return await this.employeeService.documentationStatus(id);
   }
 }

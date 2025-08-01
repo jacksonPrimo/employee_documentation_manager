@@ -8,6 +8,8 @@ import { Employee } from '@prisma/client';
 import { EmployeeFactory } from './factories/employee.factory';
 import { HttpAdapterHost } from '@nestjs/core';
 import { PrismaClientExceptionFilter } from 'src/prisma/prisma-client-exception.filter';
+import { DocumentFactory } from './factories/document.factory';
+import { DocumentTypeFactory } from './factories/document-type.factory';
 
 describe('EmployeeController (e2e)', () => {
   let app: INestApplication<App>;
@@ -162,6 +164,28 @@ describe('EmployeeController (e2e)', () => {
             error: 'Bad Request',
             statusCode: 400,
           });
+      });
+    });
+  });
+
+  describe('/documentation-status (GET)', () => {
+    describe('success cases', () => {
+      it('list document statuses', async () => {
+        const documentType = await new DocumentTypeFactory().getInstance();
+        const employee = await new EmployeeFactory().getInstance();
+        await new DocumentFactory(employee.id, documentType.id).getInstance();
+        await new DocumentFactory(
+          employee.id,
+          documentType.id,
+          false,
+        ).getInstance();
+        await request(app.getHttpServer())
+          .get(`/employee/${employee.id}/documentation-status`)
+          .expect(200)
+          .expect([
+            { name: documentType.name, status: 'Pendente' },
+            { name: documentType.name, status: 'enviado' },
+          ]);
       });
     });
   });

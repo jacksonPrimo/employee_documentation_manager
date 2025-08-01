@@ -23,4 +23,18 @@ export class EmployeeService {
 
     return employee;
   }
+
+  async documentationStatus(
+    id: string,
+  ): Promise<{ name: string; status: string }[]> {
+    const documents = await this.prisma.document.findMany({
+      where: { employeeId: id },
+      include: { documentType: true },
+    });
+
+    return documents.map((d) => ({
+      name: d.documentType.name,
+      status: d.pending ? 'Pendente' : 'enviado',
+    }));
+  }
 }
