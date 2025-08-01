@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Post } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { AssociateDocumentToEmployeeDto } from './dto/associate-document-to-employee.dto';
 
@@ -9,5 +9,10 @@ export class DocumentController {
   @Post('/associate')
   associate(@Body() body: AssociateDocumentToEmployeeDto) {
     return this.documentService.associate(body);
+  }
+
+  @Delete('/disassociate')
+  disassociate(@Body() body: AssociateDocumentToEmployeeDto) {
+    return this.documentService.disassociate(body);
   }
 }
